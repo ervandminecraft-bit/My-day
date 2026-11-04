@@ -1,0 +1,680 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<title>Мой день</title>
+<meta name="theme-color" content="#0f8a6d">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Мой день">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-192.png">
+<style>
+:root{
+  --bg:#f3f6f4; --card:#ffffff; --text:#13201b; --muted:#6a7a73; --line:#e2e9e5;
+  --accent:#0f8a6d; --accent-ink:#ffffff; --accent-soft:#e3f4ee;
+  --danger:#d2433b; --danger-soft:#fbe9e7; --warn:#c77d0a; --warn-soft:#fdf1dc;
+  --seg:#e9efec; --shadow:0 1px 2px rgba(10,30,20,.06),0 4px 14px rgba(10,30,20,.05);
+}
+@media (prefers-color-scheme:dark){
+  :root{
+    --bg:#0d1311; --card:#16201b; --text:#e7f0eb; --muted:#8c9f96; --line:#23302a;
+    --accent:#2ec79b; --accent-ink:#04201a; --accent-soft:#12372d;
+    --danger:#ff6f66; --danger-soft:#3a1f1c; --warn:#f0b04a; --warn-soft:#3a2d12;
+    --seg:#1e2a24; --shadow:none;
+  }
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:var(--bg);color:var(--text);
+  font:16px/1.4 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,sans-serif;
+  touch-action:manipulation;-webkit-text-size-adjust:100%}
+body{display:flex;flex-direction:column;height:100dvh;overflow:hidden;overscroll-behavior:none}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer;border:0;background:none;padding:0}
+[hidden]{display:none!important}
+
+/* header */
+header{flex:none;display:flex;align-items:center;justify-content:space-between;
+  padding:calc(env(safe-area-inset-top) + 12px) 18px 8px}
+header h1{margin:0;font-size:28px;font-weight:800;letter-spacing:-.5px}
+.iconbtn{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;color:var(--muted)}
+.iconbtn:active{background:var(--seg)}
+.iconbtn.on{color:var(--accent);background:var(--accent-soft)}
+svg.i{width:23px;height:23px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+
+/* scrolling area */
+main{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:4px 16px 150px}
+.empty{text-align:center;color:var(--muted);padding:56px 24px}
+.empty .big{font-size:44px;margin-bottom:8px}
+
+/* bottom tabs */
+nav{flex:none;display:flex;background:var(--card);border-top:1px solid var(--line);
+  padding:6px 6px calc(env(safe-area-inset-bottom) + 4px);position:relative;z-index:5}
+.tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;
+  color:var(--muted);font-size:11px;font-weight:600;position:relative}
+.tab.on{color:var(--accent)}
+.tab .badge{position:absolute;top:1px;left:calc(50% + 6px);background:var(--danger);color:#fff;
+  font-size:10px;min-width:17px;height:17px;border-radius:9px;display:grid;place-items:center;padding:0 4px}
+#fab{position:fixed;right:18px;bottom:calc(env(safe-area-inset-bottom) + 76px);z-index:6;
+  width:58px;height:58px;border-radius:50%;background:var(--accent);color:var(--accent-ink);
+  font-size:34px;line-height:1;display:grid;place-items:center;box-shadow:0 6px 18px rgba(15,138,109,.4)}
+#fab:active{transform:scale(.94)}
+
+/* generic */
+.card{background:var(--card);border-radius:18px;box-shadow:var(--shadow);padding:14px 16px;margin-bottom:12px}
+.row{display:flex;align-items:center;gap:12px;background:var(--card);border-radius:16px;
+  padding:13px 14px;margin-bottom:8px;box-shadow:var(--shadow)}
+.row:active{filter:brightness(.97)}
+.grow{flex:1;min-width:0}
+.t{font-weight:600;word-break:break-word}
+.sub{font-size:13px;color:var(--muted);margin-top:2px;display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.done .t{text-decoration:line-through;color:var(--muted)}
+.section{font-size:13px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.6px;margin:18px 4px 8px}
+.section.red{color:var(--danger)}
+.pill{font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--seg);color:var(--muted)}
+.pill.red{background:var(--danger-soft);color:var(--danger)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.ok{background:var(--accent-soft);color:var(--accent)}
+.chk{flex:none;width:28px;height:28px;border-radius:50%;border:2px solid var(--line);
+  display:grid;place-items:center;color:transparent;font-size:16px;font-weight:800}
+.chk.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.chk.on::after{content:"✓"}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:2px 0 10px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;padding:7px 14px;border-radius:999px;background:var(--card);border:1px solid var(--line);
+  font-size:14px;font-weight:600;color:var(--muted)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.banner{background:var(--warn-soft);color:var(--warn);border-radius:14px;padding:11px 14px;margin-bottom:12px;
+  font-weight:600;font-size:14px}
+.banner.red{background:var(--danger-soft);color:var(--danger)}
+
+/* finance */
+.monthnav{display:flex;align-items:center;justify-content:space-between;margin:2px 0 12px}
+.monthnav b{font-size:17px;text-transform:capitalize}
+.hero{background:linear-gradient(135deg,var(--accent),#0a6a55);color:#fff;border-radius:22px;padding:18px;margin-bottom:12px}
+.hero small{opacity:.85;font-weight:600}
+.hero .big{font-size:34px;font-weight:800;letter-spacing:-.5px;margin:2px 0 12px}
+.curs{display:flex;gap:8px}
+.curs div{flex:1;background:rgba(255,255,255,.16);border-radius:12px;padding:8px 10px;font-size:13px}
+.curs div b{display:block;font-size:15px;margin-top:1px;white-space:nowrap}
+.stats{display:flex;gap:10px;margin-bottom:12px}
+.stats .card{flex:1;margin:0;padding:12px 14px}
+.stats small{color:var(--muted);font-weight:600}
+.stats b{display:block;font-size:17px;margin-top:2px}
+.inc{color:var(--accent)} .exp{color:var(--danger)}
+.bar{height:8px;border-radius:4px;background:var(--seg);overflow:hidden;margin-top:6px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:4px}
+.catrow{margin-bottom:12px}
+.catrow:last-child{margin-bottom:0}
+.catrow .l{display:flex;justify-content:space-between;font-size:14px;font-weight:600;gap:8px}
+.emo{flex:none;width:40px;height:40px;border-radius:12px;background:var(--seg);display:grid;place-items:center;font-size:20px}
+.amt{text-align:right;font-weight:700;white-space:nowrap}
+.amt small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+
+/* sheet */
+.sheet{position:fixed;inset:0;z-index:20;display:flex;align-items:flex-end}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.45)}
+.panel{position:relative;width:100%;max-height:92dvh;overflow-y:auto;background:var(--bg);
+  border-radius:24px 24px 0 0;padding:10px 18px calc(env(safe-area-inset-bottom) + 18px);
+  animation:up .22s ease-out}
+@keyframes up{from{transform:translateY(40px);opacity:0}to{transform:none;opacity:1}}
+.grab{width:40px;height:5px;border-radius:3px;background:var(--line);margin:0 auto 12px}
+.panel h2{margin:0 0 14px;font-size:21px}
+label.l{display:block;font-size:13px;font-weight:700;color:var(--muted);margin:14px 2px 6px}
+input[type=text],input[type=number],input[type=date],input[type=datetime-local],input[inputmode],textarea{
+  width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;
+  font-size:16px;outline:none;appearance:none;-webkit-appearance:none;min-height:50px}
+input:focus,textarea:focus{border-color:var(--accent)}
+textarea{min-height:150px;resize:vertical}
+.amount{font-size:34px!important;font-weight:800;text-align:center;padding:14px!important}
+.seg{display:flex;background:var(--seg);border-radius:13px;padding:3px;gap:3px}
+.seg label{flex:1;margin:0}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;text-align:center;padding:10px 6px;border-radius:10px;font-weight:700;font-size:15px;color:var(--muted)}
+.seg input:checked+span{background:var(--card);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.cats{display:flex;flex-wrap:wrap;gap:8px}
+.cats label{margin:0}
+.cats input{position:absolute;opacity:0;pointer-events:none}
+.cats span{display:block;padding:8px 13px;border-radius:999px;background:var(--card);border:1px solid var(--line);font-size:14px;font-weight:600}
+.cats input:checked+span{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.switch{display:flex;align-items:center;justify-content:space-between;background:var(--card);
+  border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-top:14px;font-weight:600}
+.switch input{width:22px;height:22px;accent-color:var(--accent)}
+.actions{display:flex;gap:10px;margin-top:20px}
+.btn{flex:1;padding:14px;border-radius:14px;font-weight:700;background:var(--seg);text-align:center}
+.btn.primary{background:var(--accent);color:var(--accent-ink)}
+.btn.danger{background:var(--danger-soft);color:var(--danger);flex:none;padding:14px 18px}
+.btn:active{filter:brightness(.92)}
+.setrow{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.setrow span{flex:none;width:120px;font-weight:600}
+.setrow input{min-height:46px}
+.note{font-size:13px;color:var(--muted);margin:6px 2px 0}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 90px);transform:translateX(-50%);
+  background:#1c2723;color:#fff;padding:10px 16px;border-radius:12px;font-size:14px;font-weight:600;z-index:50;
+  max-width:88vw;text-align:center;opacity:0;pointer-events:none;transition:opacity .2s}
+#toast.show{opacity:1}
+</style>
+</head>
+<body>
+<header>
+  <h1 id="title">Мой день</h1>
+  <button class="iconbtn" id="gear" aria-label="Настройки">
+    <svg class="i" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+  </button>
+</header>
+
+<main id="view"></main>
+
+<button id="fab" aria-label="Добавить">+</button>
+
+<nav>
+  <button class="tab" data-tab="tasks"><svg class="i" viewBox="0 0 24 24"><path d="M9 11l3 3 8-8"/><path d="M20 12v7a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h9"/></svg>Задачи</button>
+  <button class="tab" data-tab="rem"><svg class="i" viewBox="0 0 24 24"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>Напоминания<span class="badge" id="remBadge" hidden></span></button>
+  <button class="tab" data-tab="fin"><svg class="i" viewBox="0 0 24 24"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>Финансы</button>
+  <button class="tab" data-tab="notes"><svg class="i" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Заметки</button>
+</nav>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="scrim" data-action="close"></div>
+  <div class="panel"><div class="grab"></div><div id="sheetBody"></div></div>
+</div>
+<div id="toast"></div>
+<input type="file" id="importFile" accept="application/json,.json" hidden>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const KEY = 'moi-den-v1';
+const CUR = ['USD', 'AMD', 'RUB'];
+const SYM = { USD: '$', AMD: '֏', RUB: '₽' };
+const CATS = {
+  exp: [['Еда','🍽'],['Транспорт','🚌'],['Жильё','🏠'],['Учёба','📚'],['Здоровье','💊'],['Развлечения','🎬'],['Одежда','👕'],['Связь','📱'],['Подписки','🔁'],['Другое','📦']],
+  inc: [['Зарплата','💼'],['Стипендия','🎓'],['Подработка','🛠'],['Подарок','🎁'],['Другое','💰']]
+};
+const emoOf = (type, cat) => (CATS[type].find(c => c[0] === cat) || ['', '📦'])[1];
+const TITLES = { tasks: 'Задачи', rem: 'Напоминания', fin: 'Финансы', notes: 'Заметки', set: 'Настройки' };
+const PRIO = ['Обычная', 'Важная', 'Срочная'];
+
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const pad = n => String(n).padStart(2, '0');
+const ymd = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+const todayStr = () => ymd(new Date());
+const hm = d => `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const nf = new Intl.NumberFormat('ru-RU', { maximumFractionDigits: 2 });
+
+function dayLabel(ds) {
+  const d = new Date(ds + 'T00:00:00');
+  const diff = Math.round((d - new Date(todayStr() + 'T00:00:00')) / 86400000);
+  if (diff === 0) return 'Сегодня';
+  if (diff === 1) return 'Завтра';
+  if (diff === -1) return 'Вчера';
+  return d.toLocaleDateString('ru-RU', { day: 'numeric', month: 'long', weekday: 'short' });
+}
+
+/* ---------- state ---------- */
+const defaults = () => ({
+  tasks: [], reminders: [], tx: [], notes: [],
+  settings: { base: 'USD', rates: { USD: 1, AMD: 385, RUB: 80 }, ratesUpdated: null, lastCur: 'AMD', lastBackup: null }
+});
+function normalize(raw) {
+  const d = defaults();
+  const s = Object.assign(d, raw || {});
+  ['tasks', 'reminders', 'tx', 'notes'].forEach(k => { if (!Array.isArray(s[k])) s[k] = []; });
+  s.settings = Object.assign(defaults().settings, s.settings || {});
+  s.settings.rates = Object.assign({}, defaults().settings.rates, s.settings.rates || {}, { USD: 1 });
+  return s;
+}
+let S;
+try { S = normalize(JSON.parse(localStorage.getItem(KEY) || '{}')); } catch (e) { S = normalize({}); }
+function save() {
+  try { localStorage.setItem(KEY, JSON.stringify(S)); }
+  catch (e) { toast('Не удалось сохранить данные'); }
+}
+if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+
+let tab = 'tasks';
+try { tab = localStorage.getItem('moi-den-tab') || 'tasks'; } catch (e) {}
+if (!TITLES[tab]) tab = 'tasks';
+let taskFilter = 'active';
+let vm = { y: new Date().getFullYear(), m: new Date().getMonth() };
+let editing = null;
+
+/* ---------- money ---------- */
+const conv = (a, from, to) => from === to ? a : a / S.settings.rates[from] * S.settings.rates[to];
+const money = (v, c) => nf.format(v) + '\u00A0' + SYM[c];
+const signed = (v, c, type) => (type === 'inc' ? '+' : '−') + money(v, c);
+
+/* ---------- toast ---------- */
+let toastT;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+/* ---------- render: tasks ---------- */
+function rTasks() {
+  const today = todayStr();
+  const active = S.tasks.filter(t => !t.done);
+  const overdue = active.filter(t => t.due && t.due < today).length;
+  let list = S.tasks.filter(t => taskFilter === 'all' || (taskFilter === 'done') === !!t.done);
+  list.sort((a, b) =>
+    (a.done - b.done) || (b.prio - a.prio) ||
+    ((a.due || '9999') < (b.due || '9999') ? -1 : (a.due || '9999') > (b.due || '9999') ? 1 : 0) ||
+    (a.created - b.created));
+  const chip = (v, l) => `<button class="chip ${taskFilter === v ? 'on' : ''}" data-action="filter" data-v="${v}">${l}</button>`;
+  let h = `<div class="chips">${chip('active', 'Активные · ' + active.length)}${chip('done', 'Выполненные')}${chip('all', 'Все')}</div>`;
+  if (overdue) h += `<div class="banner red">Просрочено задач: ${overdue}</div>`;
+  if (!list.length) {
+    return h + `<div class="empty"><div class="big">✅</div>${taskFilter === 'done' ? 'Пока нет выполненных задач' : 'Задач нет.<br>Нажми «+», чтобы добавить'}</div>`;
+  }
+  h += list.map(t => {
+    const late = !t.done && t.due && t.due < today;
+    const due = t.due ? `<span class="pill ${late ? 'red' : t.due === today ? 'warn' : ''}">${esc(dayLabel(t.due))}</span>` : '';
+    const pr = t.prio ? `<span class="pill ${t.prio === 2 ? 'red' : 'warn'}">${PRIO[t.prio]}</span>` : '';
+    return `<div class="row ${t.done ? 'done' : ''}" data-action="edit-task" data-id="${t.id}">
+      <button class="chk ${t.done ? 'on' : ''}" data-action="toggle-task" data-id="${t.id}" aria-label="Готово"></button>
+      <div class="grow"><div class="t">${esc(t.title)}</div>${due || pr ? `<div class="sub">${pr}${due}</div>` : ''}</div>
+    </div>`;
+  }).join('');
+  return h;
+}
+
+/* ---------- render: reminders ---------- */
+const CAL = '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>';
+function remRow(r, late) {
+  const d = new Date(r.at);
+  const when = `${dayLabel(ymd(d))}, ${hm(d)}`;
+  return `<div class="row ${r.done ? 'done' : ''}" data-action="edit-rem" data-id="${r.id}">
+    <button class="chk ${r.done ? 'on' : ''}" data-action="toggle-rem" data-id="${r.id}" aria-label="Готово"></button>
+    <div class="grow"><div class="t">${r.important ? '❗ ' : ''}${esc(r.title)}</div>
+      <div class="sub"><span class="pill ${late ? 'red' : ''}">${esc(when)}</span>${r.note ? `<span>${esc(r.note.slice(0, 40))}</span>` : ''}</div></div>
+    ${r.done ? '' : `<button class="iconbtn" data-action="ics" data-id="${r.id}" aria-label="В календарь">${CAL}</button>`}
+  </div>`;
+}
+function rRem() {
+  const now = new Date();
+  const all = S.reminders.slice().sort((a, b) => a.at.localeCompare(b.at));
+  const act = all.filter(r => !r.done);
+  const late = act.filter(r => new Date(r.at) < now);
+  const soon = act.filter(r => new Date(r.at) >= now);
+  const done = all.filter(r => r.done).reverse().slice(0, 15);
+  if (!all.length) return `<div class="empty"><div class="big">🔔</div>Напоминаний нет.<br>Нажми «+», чтобы добавить</div>`;
+  let h = '';
+  if (late.length) h += `<div class="section red">Просрочено</div>` + late.map(r => remRow(r, true)).join('');
+  if (soon.length) h += `<div class="section">Предстоящие</div>` + soon.map(r => remRow(r, false)).join('');
+  if (done.length) h += `<div class="section">Выполненные</div>` + done.map(r => remRow(r, false)).join('');
+  h += `<p class="note">Чтобы iPhone напомнил, даже когда приложение закрыто, нажми на иконку календаря рядом с напоминанием: оно добавится в «Календарь» с уведомлением.</p>`;
+  return h;
+}
+
+/* ---------- render: finance ---------- */
+function rFin() {
+  const base = S.settings.base;
+  const key = `${vm.y}-${pad(vm.m + 1)}`;
+  const monthName = new Date(vm.y, vm.m, 1).toLocaleDateString('ru-RU', { month: 'long', year: 'numeric' }).replace(/\s?г\.$/, '');
+  const bal = { USD: 0, AMD: 0, RUB: 0 };
+  S.tx.forEach(t => { bal[t.cur] += (t.type === 'inc' ? 1 : -1) * t.amount; });
+  const totalBase = CUR.reduce((s, c) => s + conv(bal[c], c, base), 0);
+  const mt = S.tx.filter(t => t.date.startsWith(key)).sort((a, b) => b.date.localeCompare(a.date) || b.ts - a.ts);
+  let inc = 0, exp = 0; const cats = {};
+  mt.forEach(t => {
+    const v = conv(t.amount, t.cur, base);
+    if (t.type === 'inc') inc += v; else { exp += v; cats[t.cat] = (cats[t.cat] || 0) + v; }
+  });
+
+  let h = `<div class="hero"><small>Остаток за всё время, в ${base}</small>
+    <div class="big">${esc(money(totalBase, base))}</div>
+    <div class="curs">${CUR.map(c => `<div>${c}<b>${esc(money(bal[c], c))}</b></div>`).join('')}</div></div>`;
+
+  h += `<div class="monthnav"><button class="iconbtn" data-action="month-prev" aria-label="Назад">‹</button>
+    <b>${esc(monthName)}</b><button class="iconbtn" data-action="month-next" aria-label="Вперёд">›</button></div>`;
+
+  h += `<div class="stats">
+    <div class="card"><small>Доходы</small><b class="inc">${esc(money(inc, base))}</b></div>
+    <div class="card"><small>Расходы</small><b class="exp">${esc(money(exp, base))}</b></div></div>`;
+
+  const catList = Object.entries(cats).sort((a, b) => b[1] - a[1]);
+  if (catList.length) {
+    const max = catList[0][1];
+    h += `<div class="card"><div class="section" style="margin-top:0">Расходы по категориям</div>` +
+      catList.map(([c, v]) => `<div class="catrow"><div class="l"><span>${emoOf('exp', c)} ${esc(c)}</span><span>${esc(money(v, base))}</span></div>
+        <div class="bar"><i style="width:${Math.max(3, v / max * 100)}%"></i></div></div>`).join('') + `</div>`;
+  }
+
+  if (!mt.length) return h + `<div class="empty"><div class="big">💸</div>В этом месяце операций нет.<br>Нажми «+», чтобы записать</div>`;
+
+  let last = '';
+  mt.forEach(t => {
+    if (t.date !== last) { h += `<div class="section">${esc(dayLabel(t.date))}</div>`; last = t.date; }
+    const other = t.cur !== base ? `<small>≈ ${esc(money(conv(t.amount, t.cur, base), base))}</small>` : '';
+    h += `<div class="row" data-action="edit-tx" data-id="${t.id}">
+      <div class="emo">${emoOf(t.type, t.cat)}</div>
+      <div class="grow"><div class="t">${esc(t.cat)}</div>${t.note ? `<div class="sub">${esc(t.note)}</div>` : ''}</div>
+      <div class="amt ${t.type}">${esc(signed(t.amount, t.cur, t.type))}${other}</div></div>`;
+  });
+  return h;
+}
+
+/* ---------- render: notes ---------- */
+function rNotes() {
+  if (!S.notes.length) return `<div class="empty"><div class="big">📝</div>Заметок нет.<br>Нажми «+», чтобы написать</div>`;
+  const list = S.notes.slice().sort((a, b) => (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) || b.updated - a.updated);
+  return list.map(n => `<div class="row" data-action="edit-note" data-id="${n.id}" style="align-items:flex-start">
+    <div class="grow"><div class="t">${n.pinned ? '📌 ' : ''}${esc(n.title || 'Без названия')}</div>
+    <div class="sub" style="display:block">${esc((n.text || '').slice(0, 120))}</div></div></div>`).join('');
+}
+
+/* ---------- render: settings ---------- */
+function rSet() {
+  const st = S.settings;
+  const upd = st.ratesManual ? 'заданы вручную' : st.ratesUpdated ? new Date(st.ratesUpdated).toLocaleString('ru-RU') : 'стандартные значения, нажми «Обновить»';
+  return `
+  <div class="card"><div class="section" style="margin-top:0">Основная валюта для итогов</div>
+    <div class="seg">${CUR.map(c => `<label><input type="radio" name="base" value="${c}" ${st.base === c ? 'checked' : ''}><span>${c} ${SYM[c]}</span></label>`).join('')}</div>
+    <p class="note">Каждая операция хранится в той валюте, в которой ты её записал. В итогах всё пересчитывается по курсам ниже.</p></div>
+
+  <div class="card"><div class="section" style="margin-top:0">Курсы: за 1 доллар</div>
+    <div class="setrow"><span>Драмы ֏</span><input type="number" inputmode="decimal" step="any" id="rate-AMD" value="${st.rates.AMD}"></div>
+    <div class="setrow"><span>Рубли ₽</span><input type="number" inputmode="decimal" step="any" id="rate-RUB" value="${st.rates.RUB}"></div>
+    <div class="actions" style="margin-top:6px"><button class="btn" data-action="rates">Обновить из интернета</button></div>
+    <p class="note">Обновлено: ${esc(upd)}</p></div>
+
+  <div class="card"><div class="section" style="margin-top:0">Резервная копия</div>
+    <p class="note" style="margin-top:0">Данные хранятся только в этом телефоне. Время от времени сохраняй копию в «Файлы» или iCloud: тогда ничего не потеряется, даже если сменишь телефон.</p>
+    <div class="actions"><button class="btn primary" data-action="export">Сохранить копию</button>
+    <button class="btn" data-action="import">Загрузить копию</button></div>
+    <p class="note">${st.lastBackup ? 'Последняя копия: ' + esc(new Date(st.lastBackup).toLocaleDateString('ru-RU')) : 'Копия ещё не сохранялась'}</p></div>
+
+  <div class="card"><div class="actions" style="margin-top:0"><button class="btn danger" style="flex:1" data-action="wipe">Стереть все данные</button></div></div>`;
+}
+
+/* ---------- main render ---------- */
+function backupBanner() {
+  const n = S.tx.length + S.tasks.length + S.notes.length + S.reminders.length;
+  const st = S.settings.lastBackup;
+  if (n >= 8 && (!st || Date.now() - st > 14 * 86400000)) {
+    return `<div class="banner" data-action="to-settings">Сохрани резервную копию данных: нажми сюда</div>`;
+  }
+  return '';
+}
+function render() {
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('on', b.dataset.tab === tab));
+  $('#gear').classList.toggle('on', tab === 'set');
+  $('#title').textContent = TITLES[tab];
+  const fn = { tasks: rTasks, rem: rRem, fin: rFin, notes: rNotes, set: rSet }[tab];
+  const v = $('#view');
+  const top = v.scrollTop;
+  v.innerHTML = (tab === 'set' ? '' : backupBanner()) + fn();
+  v.scrollTop = top;
+  $('#fab').hidden = tab === 'set';
+  const now = new Date();
+  const late = S.reminders.filter(r => !r.done && new Date(r.at) < now).length;
+  const b = $('#remBadge'); b.hidden = !late; b.textContent = late;
+}
+function go(t) {
+  tab = t;
+  try { localStorage.setItem('moi-den-tab', t); } catch (e) {}
+  $('#view').scrollTop = 0;
+  render();
+}
+
+/* ---------- sheet ---------- */
+function openSheet(html) {
+  $('#sheetBody').innerHTML = html;
+  $('#sheet').hidden = false;
+  $('.panel').scrollTop = 0;
+}
+function closeSheet() { $('#sheet').hidden = true; $('#sheetBody').innerHTML = ''; editing = null; }
+const val = id => { const e = $('#' + id); return e ? e.value : ''; };
+const radio = name => { const e = document.querySelector(`#sheet input[name=${name}]:checked`); return e ? e.value : ''; };
+const actions = (del, saveAct) => `<div class="actions">${del ? `<button class="btn danger" data-action="${del}">Удалить</button>` : ''}
+  <button class="btn primary" data-action="${saveAct}">Сохранить</button></div>`;
+const segHtml = (name, opts, sel) => `<div class="seg">${opts.map(([v, l]) =>
+  `<label><input type="radio" name="${name}" value="${v}" ${String(sel) === String(v) ? 'checked' : ''}><span>${l}</span></label>`).join('')}</div>`;
+
+/* tasks form */
+function openTask(id) {
+  const t = S.tasks.find(x => x.id === id);
+  editing = { type: 'task', id: t ? t.id : null };
+  openSheet(`<h2>${t ? 'Задача' : 'Новая задача'}</h2>
+    <input type="text" id="f-title" placeholder="Что нужно сделать?" value="${esc(t ? t.title : '')}" enterkeyhint="done" autocomplete="off">
+    <label class="l">Срок</label><input type="date" id="f-due" value="${esc(t ? t.due || '' : '')}">
+    <label class="l">Важность</label>${segHtml('prio', PRIO.map((p, i) => [i, p]), t ? t.prio : 0)}
+    ${actions(t ? 'del-task' : '', 'save-task')}`);
+  if (!t) setTimeout(() => $('#f-title') && $('#f-title').focus(), 60);
+}
+function saveTask() {
+  const title = val('f-title').trim();
+  if (!title) return toast('Напиши, что нужно сделать');
+  const data = { title, due: val('f-due'), prio: +radio('prio') || 0 };
+  if (editing.id) Object.assign(S.tasks.find(x => x.id === editing.id), data);
+  else S.tasks.push({ id: uid(), done: false, created: Date.now(), ...data });
+  save(); closeSheet(); render();
+}
+
+/* reminders form */
+function nextHour() { const d = new Date(); d.setMinutes(0, 0, 0); d.setHours(d.getHours() + 1); return `${ymd(d)}T${hm(d)}`; }
+function openRem(id) {
+  const r = S.reminders.find(x => x.id === id);
+  editing = { type: 'rem', id: r ? r.id : null };
+  openSheet(`<h2>${r ? 'Напоминание' : 'Новое напоминание'}</h2>
+    <input type="text" id="f-title" placeholder="О чём напомнить?" value="${esc(r ? r.title : '')}" enterkeyhint="done" autocomplete="off">
+    <label class="l">Когда</label><input type="datetime-local" id="f-at" value="${esc(r ? r.at : nextHour())}">
+    <label class="l">Заметка (необязательно)</label><input type="text" id="f-note" value="${esc(r ? r.note || '' : '')}" autocomplete="off">
+    <label class="switch">Важное ❗<input type="checkbox" id="f-imp" ${r && r.important ? 'checked' : ''}></label>
+    ${actions(r ? 'del-rem' : '', 'save-rem')}`);
+  if (!r) setTimeout(() => $('#f-title') && $('#f-title').focus(), 60);
+}
+function saveRem() {
+  const title = val('f-title').trim();
+  const at = val('f-at');
+  if (!title) return toast('Напиши, о чём напомнить');
+  if (!at) return toast('Выбери дату и время');
+  const data = { title, at, note: val('f-note').trim(), important: $('#f-imp').checked };
+  if (editing.id) Object.assign(S.reminders.find(x => x.id === editing.id), data);
+  else S.reminders.push({ id: uid(), done: false, created: Date.now(), ...data });
+  save(); closeSheet(); render();
+}
+
+/* finance form */
+function catChips(type, sel) {
+  return CATS[type].map(([c, e]) => `<label><input type="radio" name="cat" value="${c}" ${c === sel ? 'checked' : ''}><span>${e} ${c}</span></label>`).join('');
+}
+function openTx(id) {
+  const t = S.tx.find(x => x.id === id);
+  editing = { type: 'tx', id: t ? t.id : null };
+  const type = t ? t.type : 'exp';
+  const cur = t ? t.cur : S.settings.lastCur;
+  const cat = t ? t.cat : CATS[type][0][0];
+  const date = t ? t.date : todayStr();
+  openSheet(`<h2>${t ? 'Операция' : 'Новая операция'}</h2>
+    ${segHtml('type', [['exp', 'Расход'], ['inc', 'Доход']], type)}
+    <label class="l">Сумма</label>
+    <input type="text" inputmode="decimal" id="f-amount" class="amount" placeholder="0" value="${t ? esc(String(t.amount).replace('.', ',')) : ''}" autocomplete="off">
+    <div style="margin-top:10px">${segHtml('cur', CUR.map(c => [c, `${SYM[c]} ${c}`]), cur)}</div>
+    <label class="l">Категория</label><div class="cats" id="catbox">${catChips(type, cat)}</div>
+    <label class="l">Заметка (необязательно)</label><input type="text" id="f-note" value="${esc(t ? t.note || '' : '')}" autocomplete="off">
+    <label class="l">Дата</label><input type="date" id="f-date" value="${esc(date)}">
+    ${actions(t ? 'del-tx' : '', 'save-tx')}`);
+  if (!t) setTimeout(() => $('#f-amount') && $('#f-amount').focus(), 60);
+}
+function saveTx() {
+  const amount = parseFloat(val('f-amount').replace(/\s/g, '').replace(',', '.'));
+  if (!(amount > 0)) return toast('Введи сумму больше нуля');
+  const type = radio('type') || 'exp';
+  const data = { type, amount: Math.round(amount * 100) / 100, cur: radio('cur') || 'USD', cat: radio('cat') || CATS[type][0][0], note: val('f-note').trim(), date: val('f-date') || todayStr() };
+  if (editing.id) Object.assign(S.tx.find(x => x.id === editing.id), data);
+  else S.tx.push({ id: uid(), ts: Date.now(), ...data });
+  S.settings.lastCur = data.cur;
+  const [y, m] = data.date.split('-').map(Number);
+  vm = { y, m: m - 1 };
+  save(); closeSheet(); render();
+}
+
+/* notes form */
+function openNote(id) {
+  const n = S.notes.find(x => x.id === id);
+  editing = { type: 'note', id: n ? n.id : null };
+  openSheet(`<h2>${n ? 'Заметка' : 'Новая заметка'}</h2>
+    <input type="text" id="f-title" placeholder="Название" value="${esc(n ? n.title : '')}" autocomplete="off">
+    <label class="l">Текст</label><textarea id="f-text" placeholder="Пиши здесь…">${esc(n ? n.text : '')}</textarea>
+    <label class="switch">Закрепить 📌<input type="checkbox" id="f-pin" ${n && n.pinned ? 'checked' : ''}></label>
+    ${actions(n ? 'del-note' : '', 'save-note')}`);
+  if (!n) setTimeout(() => $('#f-title') && $('#f-title').focus(), 60);
+}
+function saveNote() {
+  const title = val('f-title').trim(), text = val('f-text').trim();
+  if (!title && !text) return toast('Заметка пустая');
+  const data = { title, text, pinned: $('#f-pin').checked, updated: Date.now() };
+  if (editing.id) Object.assign(S.notes.find(x => x.id === editing.id), data);
+  else S.notes.push({ id: uid(), ...data });
+  save(); closeSheet(); render();
+}
+
+/* ---------- files: export / import / calendar ---------- */
+function download(blob, name) {
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob); a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 15000);
+}
+async function shareOrDownload(blob, name, type) {
+  const file = new File([blob], name, { type });
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try { await navigator.share({ files: [file], title: name }); return true; }
+    catch (e) { if (e && e.name === 'AbortError') return false; }
+  }
+  download(blob, name); return true;
+}
+async function exportData() {
+  const blob = new Blob([JSON.stringify(S, null, 2)], { type: 'application/json' });
+  const ok = await shareOrDownload(blob, `moi-den-${todayStr()}.json`, 'application/json');
+  if (ok) { S.settings.lastBackup = Date.now(); save(); render(); }
+}
+function importData(file) {
+  const rd = new FileReader();
+  rd.onload = () => {
+    try {
+      const j = JSON.parse(rd.result);
+      if (!j || typeof j !== 'object' || !('tx' in j || 'tasks' in j || 'notes' in j || 'reminders' in j)) throw 0;
+      if (!confirm('Заменить текущие данные данными из файла?')) return;
+      S = normalize(j); save(); render(); toast('Данные загружены');
+    } catch (e) { toast('Это не похоже на файл копии'); }
+  };
+  rd.readAsText(file);
+}
+const icsEsc = s => String(s).replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\r?\n/g, '\\n');
+function toICS(r) {
+  const d = new Date(r.at), e = new Date(d.getTime() + 30 * 60000);
+  const f = x => `${x.getFullYear()}${pad(x.getMonth() + 1)}${pad(x.getDate())}T${pad(x.getHours())}${pad(x.getMinutes())}00`;
+  const stamp = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d+/, '');
+  const title = (r.important ? '❗ ' : '') + r.title;
+  return ['BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//Moi Den//RU', 'CALSCALE:GREGORIAN', 'BEGIN:VEVENT',
+    `UID:${r.id}@moiden`, `DTSTAMP:${stamp}`, `DTSTART:${f(d)}`, `DTEND:${f(e)}`, `SUMMARY:${icsEsc(title)}`,
+    ...(r.note ? [`DESCRIPTION:${icsEsc(r.note)}`] : []),
+    'BEGIN:VALARM', 'TRIGGER:-PT0M', 'ACTION:DISPLAY', `DESCRIPTION:${icsEsc(r.title)}`, 'END:VALARM',
+    'END:VEVENT', 'END:VCALENDAR'].join('\r\n');
+}
+function addToCalendar(id) {
+  const r = S.reminders.find(x => x.id === id);
+  if (!r) return;
+  shareOrDownload(new Blob([toICS(r)], { type: 'text/calendar' }), 'napominanie.ics', 'text/calendar');
+}
+
+/* ---------- rates ---------- */
+async function updRates(silent) {
+  try {
+    const res = await fetch('https://open.er-api.com/v6/latest/USD', { cache: 'no-store' });
+    const j = await res.json();
+    if (j.result !== 'success' || !(j.rates.AMD > 0) || !(j.rates.RUB > 0)) throw new Error('bad');
+    S.settings.rates.AMD = +(+j.rates.AMD).toFixed(2);
+    S.settings.rates.RUB = +(+j.rates.RUB).toFixed(2);
+    S.settings.ratesUpdated = Date.now();
+    S.settings.ratesManual = false;
+    save(); render();
+    if (!silent) toast('Курсы обновлены');
+  } catch (e) { if (!silent) toast('Нет интернета или сервис недоступен'); }
+}
+
+/* ---------- events ---------- */
+document.addEventListener('click', e => {
+  const tabBtn = e.target.closest('.tab');
+  if (tabBtn) return go(tabBtn.dataset.tab);
+  if (e.target.closest('#gear')) return go(tab === 'set' ? 'tasks' : 'set');
+  if (e.target.closest('#fab')) return ({ tasks: openTask, rem: openRem, fin: openTx, notes: openNote }[tab] || (() => {}))();
+
+  const el = e.target.closest('[data-action]');
+  if (!el) return;
+  const a = el.dataset.action, id = el.dataset.id;
+  switch (a) {
+    case 'close': return closeSheet();
+    case 'to-settings': return go('set');
+    case 'filter': taskFilter = el.dataset.v; return render();
+    case 'toggle-task': { const t = S.tasks.find(x => x.id === id); if (t) { t.done = !t.done; save(); render(); } return; }
+    case 'edit-task': return openTask(id);
+    case 'save-task': return saveTask();
+    case 'del-task': if (confirm('Удалить задачу?')) { S.tasks = S.tasks.filter(x => x.id !== editing.id); save(); closeSheet(); render(); } return;
+    case 'toggle-rem': { const r = S.reminders.find(x => x.id === id); if (r) { r.done = !r.done; save(); render(); } return; }
+    case 'edit-rem': return openRem(id);
+    case 'save-rem': return saveRem();
+    case 'del-rem': if (confirm('Удалить напоминание?')) { S.reminders = S.reminders.filter(x => x.id !== editing.id); save(); closeSheet(); render(); } return;
+    case 'ics': return addToCalendar(id);
+    case 'month-prev': vm = vm.m === 0 ? { y: vm.y - 1, m: 11 } : { y: vm.y, m: vm.m - 1 }; return render();
+    case 'month-next': vm = vm.m === 11 ? { y: vm.y + 1, m: 0 } : { y: vm.y, m: vm.m + 1 }; return render();
+    case 'edit-tx': return openTx(id);
+    case 'save-tx': return saveTx();
+    case 'del-tx': if (confirm('Удалить операцию?')) { S.tx = S.tx.filter(x => x.id !== editing.id); save(); closeSheet(); render(); } return;
+    case 'edit-note': return openNote(id);
+    case 'save-note': return saveNote();
+    case 'del-note': if (confirm('Удалить заметку?')) { S.notes = S.notes.filter(x => x.id !== editing.id); save(); closeSheet(); render(); } return;
+    case 'rates': return updRates(false);
+    case 'export': return exportData();
+    case 'import': return $('#importFile').click();
+    case 'wipe':
+      if (confirm('Стереть ВСЕ данные? Это нельзя отменить.') && confirm('Точно стереть всё?')) { S = normalize({}); save(); render(); toast('Всё стёрто'); }
+      return;
+  }
+});
+document.addEventListener('change', e => {
+  const t = e.target;
+  if (t.name === 'type' && $('#catbox')) {
+    $('#catbox').innerHTML = catChips(t.value, CATS[t.value][0][0]);
+  } else if (t.name === 'base') {
+    S.settings.base = t.value; save(); render();
+  } else if (t.id === 'rate-AMD' || t.id === 'rate-RUB') {
+    const v = parseFloat(String(t.value).replace(',', '.'));
+    if (v > 0) { S.settings.rates[t.id.slice(5)] = v; S.settings.ratesManual = true; save(); toast('Курс сохранён'); }
+    else { toast('Курс должен быть больше нуля'); render(); }
+  } else if (t.id === 'importFile') {
+    if (t.files && t.files[0]) importData(t.files[0]);
+    t.value = '';
+  }
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter' && e.target.tagName === 'INPUT' && e.target.type === 'text' && !$('#sheet').hidden) {
+    const b = document.querySelector('#sheet [data-action^="save-"]');
+    if (b) { e.preventDefault(); b.click(); }
+  }
+});
+document.addEventListener('visibilitychange', () => { if (!document.hidden) render(); });
+setInterval(() => { if (!document.hidden && $('#sheet').hidden && tab !== 'set') render(); }, 60000);
+
+/* ---------- start ---------- */
+render();
+if (!S.settings.ratesUpdated && !S.settings.ratesManual && navigator.onLine) updRates(true);
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+  navigator.serviceWorker.register('sw.js').catch(() => {});
+}
+})();
+</script>
+</body>
+</html>
