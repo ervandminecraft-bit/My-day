@@ -1,5 +1,5 @@
 // Офлайн-кэш: сначала сеть (чтобы обновления приходили сами), при отсутствии интернета берём из кэша.
-const CACHE = 'moi-den-v1';
+const CACHE = 'moi-den-v2';
 const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
